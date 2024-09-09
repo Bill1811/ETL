@@ -1,0 +1,50 @@
+// OLAP: Tình hình mua hàng của khách hàng theo từng chi nhánh, từng loại sản phẩm,theo thời gian, hình thức thanh toán
+
+// Tình hình mua hàng của từng loại khách hàng theo từng chi nhánh
+SELECT NON EMPTY Crossjoin([Customer Type DIM].[Customer Type Name].MEMBERS,
+				{[Measures].[total]}) ON COLUMNS,
+		NON EMPTY [City DIM].[Branch].MEMBERS ON ROWS
+FROM [DDS];
+
+// Tình hình mua hàng của khách hàng theo từng chi nhánh, theo từng loại sản phẩm
+SELECT NON EMPTY Crossjoin([Product DIM].[Hierarchy].[Product Line].Members,
+                {[Measures].[Total]}) ON COLUMNS,
+		NON EMPTY [City DIM].[Branch].MEMBERS ON ROWS
+FROM [DDS];
+
+// Tình hình mua hàng của khách hàng theo từng chi nhánh, theo từng loại sản phẩm. Theo thời gian(Year, month)
+SELECT NON EMPTY Crossjoin([Product DIM].[Hierarchy].[Product Line].Members,
+                {[Measures].[Total]}) ON COLUMNS,
+		NON EMPTY Crossjoin([City DIM].[Branch].MEMBERS,
+							[Date DIM].[Hierarchy].[Year].MEMBERS, [Month].MEMBERS)ON ROWS
+FROM [DDS];
+
+// Tình hình mua hàng của khách hàng theo từng loại sản phẩm. Theo Hình thức thanh toán
+SELECT NON EMPTY Crossjoin([Product DIM].[Hierarchy].[Product Line].Members,
+                {[Measures].[Total]}) ON COLUMNS,
+		NON EMPTY Crossjoin([City DIM].[Branch].MEMBERS,
+							[Payment DIM].[Payment Name].[Payment Name])ON ROWS
+FROM [DDS];
+
+//Tình hình mua hàng của khách hàng theo từng chi nhánh, từng loại sản phẩm,
+//theo thời gian (Year = 2019)
+//hình thức thanh toán (Cash)
+SELECT NON EMPTY Crossjoin([Product DIM].[Hierarchy].[Product Line].Members,
+                {[Measures].[Total]}) ON COLUMNS,
+		NON EMPTY [City DIM].[Branch].MEMBERS ON ROWS
+FROM [DDS]
+WHERE ([Date DIM].[Hierarchy].[Year].[2019],
+		[Payment DIM].[Payment Name].[Payment Name].[Cash]);
+
+// Câu hỏi: Cho biết doanh thu của từng chi nhánh của các năm
+SELECT NON EMPTY Crossjoin([Date DIM].[Hierarchy].[Year],
+                {[Measures].[Total]}) ON COLUMNS,
+    NON EMPTY [City DIM].[Branch].MEMBERS ON ROWS
+FROM [DDS];
+
+//Câu hỏi: cho biết lượng khách hàng thanh toán theo mỗi hình thức cash, debit... của mỗi chi nhánh / của tất cả chi nhánh theo từng năm...
+SELECT NON EMPTY Crossjoin({[Payment DIM].[Payment Name].[Payment Name].MEMBERS},
+				[Date DIM].[Hierarchy].[Year]) ON COLUMNS,
+		NON EMPTY [City DIM].[Branch].MEMBERS ON ROWS
+FROM DDS;
+
